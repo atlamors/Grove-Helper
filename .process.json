@@ -1,0 +1,9 @@
+{
+    "script": "index.js",
+    "watch": true,
+    "ignore_watch": ["log"],
+    "watch_options": {
+        "followSymlinks": false
+    },
+    "name": "grove-helper"
+}

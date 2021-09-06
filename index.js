@@ -1,9 +1,10 @@
-//**
-//  Grove Helper
+/**
+ * Grove Helper
+ */
 
-global.__root = __dirname;
+global.__root = __dirname
 
-require('./_core/deploy-functions.js');
-require('./_core/deploy-discord.js');
-require('./_core/deploy-commands.js');
-require('./_core/deploy-mongodb.js');
+require('./core/deploy-mongo.js')
+require('./core/deploy-functions.js')
+require('./core/deploy-discord.js')
+require('./core/deploy-commands.js')
