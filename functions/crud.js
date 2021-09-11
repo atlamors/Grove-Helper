@@ -1,13 +1,12 @@
 'use strict'
 
 const { MongoClient } = require('mongodb')
-const { mdbProject } = require('../config.json')
+const { mdbProject, mdbPassword } = require('../config.json')
 
 class CRUD {
 
 	constructor() {
 		this.name = 'CRUD'
-		this.project = mdbProject
 	}
 	
 	/**
@@ -16,8 +15,8 @@ class CRUD {
 	 * @returns 
 	 */
 	async connect(project) {
-		project = project || this.project
-		const uri = `mongodb+srv://${project}:6TiHLJQqVZUMdi9N@guild-data.sjfjc.mongodb.net/retryWrites=true&w=majority`
+
+		const uri = `mongodb+srv://${mdbProject}:${mdbPassword}@guild-data.sjfjc.mongodb.net/retryWrites=true&w=majority`
 		const mongo = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 		
 		try {
