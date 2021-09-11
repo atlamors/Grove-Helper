@@ -1,16 +1,17 @@
 {
-  "name": "public_html",
-  "version": "1.0.0",
-  "description": "",
+  "name": "grove-helper",
+  "version": "1.1.0",
+  "description": "Discord bot for New World community management",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Andrew Nelson",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/rest": "^0.1.0-canary.0",
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/rest": "0.1.0-canary.0",
     "discord-api-types": "^0.22.0",
     "discord.js": "^13.1.0",
     "mongodb": "^4.1.1"
@@ -18,5 +19,13 @@
   "devDependencies": {
     "eslint": "^7.32.0",
     "eslint-config-google": "^0.14.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atlamors/grove-helper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/atlamors/grove-helper/issues"
+  },
+  "homepage": "https://github.com/atlamors/grove-helper#readme"
 }

@@ -1,5 +1,3 @@
-'use strict'
-
 const { CRUD } = require('../core/deploy-mongo.js')
 
 class Deposit {
@@ -33,7 +31,7 @@ class Deposit {
 	 */
 	async readMember(user, guild) {
 		const crud = new CRUD()
-		
+
 		guild = guild.id
 		user = {
 			"_id" : user.id,
@@ -77,18 +75,30 @@ class Deposit {
 
 	/**
 	 * 
+	 * @param {*} message 
+	 * @param {*} reactions 
+	 */
+	createReactions(message, reactions) {
+		reactions.forEach( e => { 
+			message.react(e)
+		});
+	}
+
+	/**
+	 * 
 	 * @param {*} user 
 	 * @param {*} guild 
 	 */
-	async checkPerms(user, guild) {
-		await guild.fetch(user.id).then( member => {
-			if ( member.roles.cache.has('883400308447916053') ) {
+	async checkPermissions(user, guild) {
+		const perms = await guild.members.fetch(user.id).then( member => {
+			const roles = member.roles.cache.has('883400308447916053')
+			if ( roles == true ) {
 				return true
 			} else {
-				console.log(member.roles.cache)
-				return null
+				return false
 			}
 		})
+		return perms
 	}
 
 	/**
@@ -98,28 +108,50 @@ class Deposit {
 	 * @param {*} reaction 
 	 * @param {*} embedMessage 
 	 */
-	confirmReaction(user, guild, reaction, embedMessage) {
-
-		if ( this.checkPerms(user, guild) ) {
-
-			console.log(`Approved! ${user.tag} has permissions.`)
-
-			switch (reaction.emoji.name) {
-				case '👍':
-					embedMessage.reactions.cache.get('❌').remove()
-					break
-				case '❌':
-					embedMessage.reactions.cache.get('👍').remove()
-					break
-				default:
-					console.log(`${reaction.emoji.name} is an invalid response.`)
+	updateConfirmationReaction(user, reaction, embedMessage, reactions) {
+		reactions.forEach( e => { 
+			if ( reaction.emoji.name !== e ) {
+				embedMessage.reactions.cache.get(e).remove()
 			}
+		});
+		reaction.users.remove(user.id)
+	}
 
-			reaction.users.remove(user.id)
+	/**
+	 * 
+	 * @param {*} user 
+	 * @param {*} guild 
+	 * @param {*} data 
+	 */
+	async updateMemberTotals(user, guild, deposit$) {
+		const member = await this.readMember(user, guild)
 
+		if (!member) this.insertMember(user, guild)
+
+		console.log(member)		
+
+		//this.updateMember(user, guild, data)
+		
+		// guild = guild.id
+		// user = {
+		// 	"_id" : user.id,
+		// }
+
+	}
+
+	async collector(collector, interaction, _user, reaction, embedMessage, reactions) {
+		const guild 	= interaction.guild 		//Guild command was issued in
+		const user		= interaction.member.user 	//User who initially issued commands
+		const deposit$ 	= interaction.options.getInteger('deposit')
+		const perms 	= await this.checkPermissions(_user, guild);
+		if ( perms == true ) {
+			console.log(`Approved! ${_user.tag} has permissions.`)
+			collector.stop()
+			this.updateConfirmationReaction(_user, reaction, embedMessage, reactions)
+			this.updateMemberTotals(user, guild, deposit$)
 		} else {
-			console.log(`${user.tag} does not have permissions.`)
-			reaction.users.remove(user.id)
+			console.log(`${_user.tag} does not have permissions.`)
+			reaction.users.remove(_user.id)
 		}
 	}
 }
