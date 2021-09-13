@@ -11,10 +11,9 @@ class CRUD {
 	
 	/**
 	 * 
-	 * @param {*} project 
 	 * @returns 
 	 */
-	async connect(project) {
+	async connect() {
 
 		const uri = `mongodb+srv://${mdbProject}:${mdbPassword}@guild-data.sjfjc.mongodb.net/retryWrites=true&w=majority`
 		const mongo = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -159,6 +158,32 @@ class CRUD {
 				console.log(`Deleted ${document._id} in collection ${collection}.`)
 			} else {
 				console.log(`${document._id} not found in collection ${collection}.`)
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param {*} document 
+	 * @param {*} collection 
+	 * @returns 
+	 */
+	async check(document, collection) {
+		const mongo = this.connect()
+
+		try {
+			var r = await mongo.then( mongo => {
+				return mongo.db(`bank`).collection(collection).countDocuments({_id: document._id}, { limit: 1 })			})
+			await this.close(mongo)
+		} catch (e) {
+			console.error(e)
+		} finally {
+			if (r) {
+				console.log(`Verified {${document._id}} from collection ${collection}.`)
+				return r
+			} else {
+				console.log(`${document._id} not found in collection ${collection}.`)
+				return null
 			}
 		}
 	}
