@@ -1,15 +1,16 @@
+const date = require('date-and-time')
 const { CRUD } = require('../core/deploy-mongo.js')
+
 
 class Deposit {
 	
-	constructor() {
-		this.name = 'Deposit'
-	}
+	constructor() {}
 
 	/**
 	 * 
 	 * @param {*} user 
 	 * @param {*} guild 
+	 * @param {*} deposit 
 	 */
 	async insertMember(user, guild, deposit) {
 		const crud = new CRUD()
@@ -18,8 +19,10 @@ class Deposit {
 		user = {
 			"_id" : user.id,
 			"name" : user.tag,
+			"date" : new Date(),
 			"deposit" : deposit,
-			"total" : deposit,
+			"balance" : deposit,
+			"totalMonth" : deposit
 		}
 
 		crud.create(user, guild) 
@@ -104,7 +107,6 @@ class Deposit {
 		})
 	}
 
-
 	/**
 	 * 
 	 * @param {*} message 
@@ -141,12 +143,38 @@ class Deposit {
 	async updateMemberTotals(user, guild, deposit) {
 		const data = await this.readMember(user, guild)
 
+		data["date"] = new Date()
 		data["deposit"] = deposit
-		data["total"] = data.total + deposit
+		data["balance"] = data.balance + deposit
+		data["totalMonth"] = data.totalMonth + deposit
 
 		this.updateMember(user, guild, data)
 	}
 
+	async insertTransactionHistory(user, guild, deposit) {
+	
+		const crud = new CRUD()
+		
+		guild = `${guild.id}.history`
+		user = {
+			"userId" : user.id,
+			"date" : new Date(),
+			"deposit" : deposit,
+		}
+
+		crud.create(user, guild) 
+
+	}
+
+	/**
+	 * 
+	 * @param {*} collector 
+	 * @param {*} interaction 
+	 * @param {*} _user 
+	 * @param {*} reaction 
+	 * @param {*} embedMessage 
+	 * @param {*} reactions 
+	 */
 	async collector(collector, interaction, _user, reaction, embedMessage, reactions) {
 		const guild 	= interaction.guild 		//Guild command was issued in
 		const user		= interaction.member.user 	//User who initially issued commands
@@ -158,7 +186,8 @@ class Deposit {
 			this.updateConfirmationReaction(_user, reaction, embedMessage, reactions)
 			this.confirmMember(user, guild).then( r => {
 				(r) ? this.updateMemberTotals(user, guild, deposit) : this.insertMember(user, guild, deposit)
-			})	
+			})
+			this.insertTransactionHistory(user, guild, deposit)
 		} else {
 			console.log(`${_user.tag} does not have permissions.`)
 				reaction.users.remove(_user.id)

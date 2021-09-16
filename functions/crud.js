@@ -7,6 +7,7 @@ class CRUD {
 
 	constructor() {
 		this.name = 'CRUD'
+		this.date = date.format( new Date(), 'YYYY-mm-dd HH:MM:ssZ')
 	}
 	
 	/**
@@ -51,6 +52,7 @@ class CRUD {
 			await this.close(mongo)
 		} catch (e) {
 			console.error(e)
+			this.listdb()
 		} finally {
 			if (r) {
 				console.log(`MongoDB successfully read listings, current databases:`)
@@ -76,6 +78,7 @@ class CRUD {
 			await this.close(mongo)
 		} catch (e) {
 			console.error(`${e.name}: ${e.message}`)
+			this.create(document, collection)
 		} finally {
 			if (r) {
 				console.log(`New document created with the _id : ${r.insertedId}.`)
@@ -101,6 +104,7 @@ class CRUD {
 			await this.close(mongo)
 		} catch (e) {
 			console.error(e)
+			this.read(document, collection)
 		} finally {
 			if (r) {
 				console.log(`Returned {${document._id}} from collection ${collection}.`)
@@ -127,11 +131,12 @@ class CRUD {
 			await this.close(mongo)
 		} catch (e) {
 			console.error(e)
+			this.update(document, collection, data)
 		} finally {
 			if (r.matchedCount >= 1 && r.modifiedCount >= 1) {
-				console.log(`Updated ${document._id} in collection ${collection}.`)
+				console.log(`Updated {${document._id}} in collection ${collection}.`)
 			} else if ( r.matchedCount >= 1 ) {
-				console.log(`No data change detected for ${document._id} in collection ${collection}.`)
+				console.log(`No data change detected for {${document._id}} in collection ${collection}.`)
 			} else {
 				console.log(`${document._id} not found in collection ${collection}.`)
 			}
@@ -153,9 +158,10 @@ class CRUD {
 			await this.close(mongo)
 		} catch (e) {
 			console.error(e)
+			this.delete(document, collection)
 		} finally {
 			if (r.deletedCount >= 1) {
-				console.log(`Deleted ${document._id} in collection ${collection}.`)
+				console.log(`Deleted {${document._id}} in collection ${collection}.`)
 			} else {
 				console.log(`${document._id} not found in collection ${collection}.`)
 			}
@@ -177,6 +183,7 @@ class CRUD {
 			await this.close(mongo)
 		} catch (e) {
 			console.error(e)
+			this.check(document, collection)
 		} finally {
 			if (r) {
 				console.log(`Verified {${document._id}} from collection ${collection}.`)
@@ -187,6 +194,36 @@ class CRUD {
 			}
 		}
 	}
+
+
+
+	/**
+	 * 
+	 * @param {*} document 
+	 * @param {*} collection 
+	 * @returns 
+	 */
+	async readMany(documents, collection) {
+		const mongo = this.connect()
+
+		try {
+			var r = await mongo.then( mongo => {
+				return mongo.db(`bank`).collection(collection).find(documents).toArray()
+			})
+			await this.close(mongo)
+		} catch (e) {
+			console.error(e)
+		} finally {
+			if (r) {
+				console.log(`Returned documents from collection ${collection}.`)
+				return r
+			} else {
+				console.log(`No documents found in collection ${collection}.`)
+				return null
+			}
+		}
+	}
+
 
 }
 
