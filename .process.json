@@ -1,10 +1,7 @@
 {
     "script": "index.js",
     "watch": true,
-    "ignore_watch": [
-		"log",
-		".gitignore"
-	],
+    "ignore_watch":],
     "watch_options": {
         "followSymlinks": false
     },
