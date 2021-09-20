@@ -1,10 +1,12 @@
 const date = require('date-and-time')
 const { CRUD } = require('../core/deploy-mongo.js')
 
-
 class Deposit {
 	
-	constructor() {}
+	constructor() {
+		this.name = 'Deposit'
+		this.date = date.format(new Date(), 'YYYY-MM-DD HH:mm:ss:SSSZ')
+	}
 
 	/**
 	 * 
@@ -152,7 +154,6 @@ class Deposit {
 	}
 
 	async insertTransactionHistory(user, guild, deposit) {
-	
 		const crud = new CRUD()
 		
 		guild = `${guild.id}.history`
@@ -163,7 +164,6 @@ class Deposit {
 		}
 
 		crud.create(user, guild) 
-
 	}
 
 	/**
@@ -181,7 +181,7 @@ class Deposit {
 		const deposit 	= interaction.options.getInteger('deposit')
 
 		if ( await this.checkPermissions(_user, guild) ) {
-			console.log(`Approved! ${_user.tag} has permissions.`)
+			console.log(`${this.date} | Approved! ${_user.tag} has permissions.`)
 			collector.stop()
 			this.updateConfirmationReaction(_user, reaction, embedMessage, reactions)
 			this.confirmMember(user, guild).then( r => {
@@ -189,7 +189,26 @@ class Deposit {
 			})
 			this.insertTransactionHistory(user, guild, deposit)
 		} else {
-			console.log(`${_user.tag} does not have permissions.`)
+			console.log(`${this.date} | ${_user.tag} does not have permissions.`)
+				reaction.users.remove(_user.id)
+		}
+	}
+
+	async collectorMany(collector, interaction, _user, reaction, embedMessage, reactions) {
+		const guild 	= interaction.guild 		//Guild command was issued in
+		const user		= interaction.member.user 	//User who initially issued commands
+		const deposit 	= interaction.options.getInteger('deposit')
+
+		if ( await this.checkPermissions(_user, guild) ) {
+			console.log(`${this.date} | Approved! ${_user.tag} has permissions.`)
+			collector.stop()
+			this.updateConfirmationReaction(_user, reaction, embedMessage, reactions)
+			this.confirmMember(user, guild).then( r => {
+				(r) ? this.updateMemberTotals(user, guild, deposit) : this.insertMember(user, guild, deposit)
+			})
+			this.insertTransactionHistory(user, guild, deposit)
+		} else {
+			console.log(`${this.date} | ${_user.tag} does not have permissions.`)
 				reaction.users.remove(_user.id)
 		}
 	}

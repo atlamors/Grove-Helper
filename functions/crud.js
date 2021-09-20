@@ -1,5 +1,6 @@
 'use strict'
 
+const date = require('date-and-time')
 const { MongoClient } = require('mongodb')
 const { mdbProject, mdbPassword } = require('../config.json')
 
@@ -7,7 +8,7 @@ class CRUD {
 
 	constructor() {
 		this.name = 'CRUD'
-		this.date = date.format( new Date(), 'YYYY-mm-dd HH:MM:ssZ')
+		this.date = date.format(new Date(), 'YYYY-MM-DD HH:mm:ss:SSSZ')
 	}
 	
 	/**
@@ -15,7 +16,6 @@ class CRUD {
 	 * @returns 
 	 */
 	async connect() {
-
 		const uri = `mongodb+srv://${mdbProject}:${mdbPassword}@guild-data.sjfjc.mongodb.net/retryWrites=true&w=majority`
 		const mongo = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 		
@@ -23,7 +23,7 @@ class CRUD {
 			await mongo.connect()
 			return mongo
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 		}
 	}
 
@@ -35,7 +35,7 @@ class CRUD {
 		try {
 			await mongo.then( mongo => { mongo.close() })
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 		}
 	}
 
@@ -51,14 +51,14 @@ class CRUD {
 			})
 			await this.close(mongo)
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 			this.listdb()
 		} finally {
 			if (r) {
-				console.log(`MongoDB successfully read listings, current databases:`)
+				console.log(`${this.date} | MongoDB successfully read listings, current databases:`)
 				r.databases.forEach( db => { console.log(` - ${db.name}`) })
 			} else {
-				console.log(`${document._id} not found in collection ${collection}.`)
+				console.log(`${this.date} | ${document._id} not found in collection ${collection}.`)
 			}
 		}
 	}
@@ -77,13 +77,13 @@ class CRUD {
 			})
 			await this.close(mongo)
 		} catch (e) {
-			console.error(`${e.name}: ${e.message}`)
+			console.error(`${this.date} | ${e}`)
 			this.create(document, collection)
 		} finally {
 			if (r) {
-				console.log(`New document created with the _id : ${r.insertedId}.`)
+				console.log(`${this.date} | New document created with the _id : ${r.insertedId}.`)
 			} else {
-				console.log(`Document was unable to be created.`)
+				console.log(`${this.date} | Document was unable to be created.`)
 			}
 		}
 	}
@@ -103,14 +103,14 @@ class CRUD {
 			})
 			await this.close(mongo)
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 			this.read(document, collection)
 		} finally {
 			if (r) {
-				console.log(`Returned {${document._id}} from collection ${collection}.`)
+				console.log(`${this.date} | Returned {${document._id}} from collection ${collection}.`)
 				return r
 			} else {
-				console.log(`${document._id} not found in collection ${collection}.`)
+				console.log(`${this.date} | ${document._id} not found in collection ${collection}.`)
 				return null
 			}
 		}
@@ -130,15 +130,15 @@ class CRUD {
 			})
 			await this.close(mongo)
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 			this.update(document, collection, data)
 		} finally {
 			if (r.matchedCount >= 1 && r.modifiedCount >= 1) {
-				console.log(`Updated {${document._id}} in collection ${collection}.`)
+				console.log(`${this.date} | Updated {${document._id}} in collection ${collection}.`)
 			} else if ( r.matchedCount >= 1 ) {
-				console.log(`No data change detected for {${document._id}} in collection ${collection}.`)
+				console.log(`${this.date} | No data change detected for {${document._id}} in collection ${collection}.`)
 			} else {
-				console.log(`${document._id} not found in collection ${collection}.`)
+				console.log(`${this.date} | ${document._id} not found in collection ${collection}.`)
 			}
 		}
 	}
@@ -157,13 +157,13 @@ class CRUD {
 			})
 			await this.close(mongo)
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 			this.delete(document, collection)
 		} finally {
 			if (r.deletedCount >= 1) {
-				console.log(`Deleted {${document._id}} in collection ${collection}.`)
+				console.log(`${this.date} | Deleted {${document._id}} in collection ${collection}.`)
 			} else {
-				console.log(`${document._id} not found in collection ${collection}.`)
+				console.log(`${this.date} | ${document._id} not found in collection ${collection}.`)
 			}
 		}
 	}
@@ -179,17 +179,18 @@ class CRUD {
 
 		try {
 			var r = await mongo.then( mongo => {
-				return mongo.db(`bank`).collection(collection).countDocuments({_id: document._id}, { limit: 1 })			})
+				return mongo.db(`bank`).collection(collection).countDocuments({_id: document._id}, { limit: 1 })
+			})
 			await this.close(mongo)
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 			this.check(document, collection)
 		} finally {
 			if (r) {
-				console.log(`Verified {${document._id}} from collection ${collection}.`)
+				console.log(`${this.date} | Verified {${document._id}} from collection ${collection}.`)
 				return r
 			} else {
-				console.log(`${document._id} not found in collection ${collection}.`)
+				console.log(`${this.date} | ${document._id} not found in collection ${collection}.`)
 				return null
 			}
 		}
@@ -212,13 +213,13 @@ class CRUD {
 			})
 			await this.close(mongo)
 		} catch (e) {
-			console.error(e)
+			console.error(`${this.date} | ${e}`)
 		} finally {
 			if (r) {
-				console.log(`Returned documents from collection ${collection}.`)
+				console.log(`${this.date} | Returned documents from collection ${collection}.`)
 				return r
 			} else {
-				console.log(`No documents found in collection ${collection}.`)
+				console.log(`${this.date} | No documents found in collection ${collection}.`)
 				return null
 			}
 		}
