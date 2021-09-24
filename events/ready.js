@@ -10,7 +10,8 @@ module.exports = {
 
         client.user.setPresence({
             status: 'online',
-            activities: [{ name: `${ver}`, type: 'LISTENING', url: 'https://www.getmysupply.co/' }],
+			activities: [{ name: `New World`, type: 'PLAYING', url: 'https://www.getmysupply.co/' }],
+            // activities: [{ name: `${ver}`, type: 'LISTENING', url: 'https://www.getmysupply.co/' }],
         })
 
         const guilds = client.guilds.cache.map ( guild => {
