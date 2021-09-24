@@ -78,6 +78,25 @@ class Display {
 		return title
 	}
 
+	constructStrings(leaderboard) {
+		let maxStr	= 12
+		let line  	= ""
+		let i 		= 1
+
+		for ( const o of leaderboard ) {
+			const rank = `${i}`
+			if ( i === 1 ) {
+				line += `👑${this.spaces(7)}`
+			} else {
+				line += `#${rank}${this.spaces(8 - rank.length)}`
+			}
+			line += `**${this.name(o.member, maxStr)}** with **${o.total}** gold\n`
+			i++
+		}
+
+		return line
+	}
+
 	spaces(amount) {
 		let spaces = ""
 		for (let i = 0; i < amount; i++) {

@@ -22,20 +22,6 @@ module.exports = {
 		const dates			= display.getMongoTimePeriod(timeperiod)
 		const title			= display.getLeaderboardTitle(timeperiod)
 		const leaderboard 	= await display.leaderboard(guild, client, dates)
-		let   maxStr		= 12
-		let   line			= ""
-		let   i 			= 1
-
-		for ( const o of leaderboard ) {
-			let rank = `${i}`
-			if ( i === 1 ) {
-				line += `👑${display.spaces(7)}`
-			} else {
-				line += `#${rank}${display.spaces(8 - rank.length)}`
-			}
-			line += `**${display.name(o.member, maxStr)}** with **${o.total}** gold\n`
-			i++
-		}
 
 		const leaderboardEmbed = new MessageEmbed()
 			.setColor('#ffd60a')
@@ -43,7 +29,7 @@ module.exports = {
 			.setThumbnail('https://atlamors.gg/public/nw-trbd.png')
 			.setFooter('Grove Company Trust', 'https://atlamors.gg/public/g__new_world_gold.png')
 			.addField('\u200b', `**Rank ${display.spaces(3)} Member**`)
-			.addField('\u200b', line)
+			.addField('\u200b', display.constructStrings(leaderboard))
 			.addField('\u200b', '\u200b')
 			.setTimestamp()
 
