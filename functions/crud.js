@@ -120,6 +120,7 @@ class CRUD {
 	 * 
 	 * @param {*} document 
 	 * @param {*} collection 
+	 * @param {*} data 
 	 */
 	async update(document, collection, data) {
 		const mongo = this.connect()
@@ -137,6 +138,33 @@ class CRUD {
 				console.log(`${this.date} | Updated {${document._id}} in collection ${collection}.`)
 			} else if ( r.matchedCount >= 1 ) {
 				console.log(`${this.date} | No data change detected for {${document._id}} in collection ${collection}.`)
+			} else {
+				console.log(`${this.date} | ${document._id} not found in collection ${collection}.`)
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param {*} document 
+	 * @param {*} collection 
+	 * @param {*} data 
+	 * @param {*} options 
+	 */
+	async upsert(document, collection, data, options) {
+		const mongo = this.connect()
+
+		try {
+			var r = await mongo.then( mongo => {
+				return mongo.db(`bank`).collection(collection).updateOne(document, { [options.operator] : data }, { upsert: true })
+			})
+			await this.close(mongo)
+		} catch (e) {
+			console.error(`${this.date} | ${e}`)
+			this.upsert(document, collection, data, options)
+		} finally {
+			if (r.modifiedCount >= 1) {
+				console.log(`${this.date} | Upserted {${document._id}} in collection ${collection}.`)
 			} else {
 				console.log(`${this.date} | ${document._id} not found in collection ${collection}.`)
 			}
@@ -196,20 +224,18 @@ class CRUD {
 		}
 	}
 
-
-
 	/**
 	 * 
 	 * @param {*} document 
 	 * @param {*} collection 
 	 * @returns 
 	 */
-	async readMany(documents, collection) {
+	async readMany(documents, collection, dates) {
 		const mongo = this.connect()
 
 		try {
 			var r = await mongo.then( mongo => {
-				return mongo.db(`bank`).collection(collection).find(documents).toArray()
+				return mongo.db(`bank`).collection(collection).find(documents, { date: dates }).toArray()
 			})
 			await this.close(mongo)
 		} catch (e) {
@@ -225,6 +251,31 @@ class CRUD {
 		}
 	}
 
+	/**
+	 * 
+	 * @param {*} collection 
+	 * @returns 
+	 */
+		 async readAll(collection) {
+			const mongo = this.connect()
+	
+			try {
+				var r = await mongo.then( mongo => {
+					return mongo.db(`bank`).collection(collection).find({}).toArray()
+				})
+				await this.close(mongo)
+			} catch (e) {
+				console.error(`${this.date} | ${e}`)
+			} finally {
+				if (r) {
+					console.log(`${this.date} | Returned all documents from collection ${collection}.`)
+					return r
+				} else {
+					console.log(`${this.date} | No documents found in collection ${collection}.`)
+					return null
+				}
+			}
+		}
 
 }
 
