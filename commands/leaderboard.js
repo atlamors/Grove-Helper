@@ -1,32 +1,54 @@
 const { SlashCommandBuilder } 	= require('@discordjs/builders')
-const { Display } 				= require('../core/deploy-functions.js')
 const { MessageEmbed } 			= require('discord.js')
-const date 						= require('date-and-time');
+const { Display } 				= require('../core/deploy-functions.js')
 
 module.exports = {
-	data: new SlashCommandBuilder()
+	data: 
+	new SlashCommandBuilder()
 		.setName('leaderboard')
-		.setDescription('View the deposit leaderboard for this month'),
-	async execute(interaction) {
+		.setDescription('View the deposit leaderboard')
+		.addStringOption(option =>
+			option.setName('timeperiod')
+				.setDescription('The leaderboard time period')
+				.setRequired(true)
+				.addChoice('Current', 'current')
+				.addChoice('All-time', 'alltime')
+		),
+	async execute(interaction, client) {
 		await interaction.reply('Generating ...')
-		const display = new Display()
-		const user 		= interaction.member.user
-		const guild 	= interaction.guild
+		const display 		= new Display()
+		const guild 		= interaction.guild
+		const timeperiod	= interaction.options.getString('timeperiod')
+		const dates			= display.getMongoTimePeriod(timeperiod)
+		const title			= display.getLeaderboardTitle(timeperiod)
+		const leaderboard 	= await display.leaderboard(guild, client, dates)
+		let   maxStr		= 12
+		let   line			= ""
+		let   i 			= 1
 
-		const leaderboard = display.leaderboard(user, guild)
+		for ( const o of leaderboard ) {
+			let rank = `${i}`
+			if ( i === 1 ) {
+				line += `👑${display.spaces(7)}`
+			} else {
+				line += `#${rank}${display.spaces(8 - rank.length)}`
+			}
+			line += `**${display.name(o.member, maxStr)}** with **${o.total}** gold\n`
+			i++
+		}
 
-		const exampleEmbed = new MessageEmbed()
+		const leaderboardEmbed = new MessageEmbed()
 			.setColor('#ffd60a')
-			.setDescription(`${date.format( new Date(), 'MMMM')}'s leaderboard.`)
-			.addFields(
-				{ name: `Rank`, value: `1\n2\n3\n4\n1\n2\n3\n4\n`, inline: true },
-				{ name: `User`, value: `{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n{user.name}\n`, inline: true },
-				{ name: `Balance`, value: '{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n{user.totalMonth}\n', inline: true },
-			)
+			.setTitle(`${title} leaderboard.`)
+			.setThumbnail('https://atlamors.gg/public/nw-trbd.png')
+			.setFooter('Grove Company Trust', 'https://atlamors.gg/public/g__new_world_gold.png')
+			.addField('\u200b', `**Rank ${display.spaces(3)} Member**`)
+			.addField('\u200b', line)
+			.addField('\u200b', '\u200b')
 			.setTimestamp()
-			.setFooter('Some footer text here', 'https://i.imgur.com/AfFp7pu.png')
 
-		await interaction.channel.send({ embeds: [exampleEmbed] }).then( embedMessage => {
+		await interaction.channel.send({ embeds: [leaderboardEmbed] }).then( embedMessage => {
+			interaction.deleteReply()
 		})
 	},
 }
