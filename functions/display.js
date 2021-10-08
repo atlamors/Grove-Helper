@@ -14,10 +14,10 @@ class Display {
 		const crud 			= new CRUD()
 		const guildHistory 	= `${guild.id}.history`
 		const allMembers 	= await crud.readAll(guild.id)
+		const positions		= 20
 		let   leaderboard	= []
 
 		for ( const member of allMembers ) {
-
 			const getMember = { userId : { $eq : member._id }	}
 			const data 		= await crud.readMany(getMember, guildHistory, dates)
 			const _user 	= await client.users.fetch(member._id)
@@ -28,10 +28,12 @@ class Display {
 			}
 
 			leaderboard.push({ member: _user.username, total: total })
-			
 		}
 
-		return leaderboard.sort((a, b) => b.total - a.total )
+		leaderboard.sort((a, b) => b.total - a.total )
+		leaderboard = leaderboard.slice(0, 20)
+
+		return leaderboard
 	}
 
 	/**
