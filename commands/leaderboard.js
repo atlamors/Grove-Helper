@@ -25,7 +25,7 @@ module.exports = {
 
 		const leaderboardEmbed = new MessageEmbed()
 			.setColor('#ffd60a')
-			.setTitle(`${title} leaderboard.`)
+			.setTitle(`${title} Top 20 leaderboard.`)
 			.setThumbnail('https://atlamors.gg/public/nw-trbd.png')
 			.setFooter('Grove Company Trust', 'https://atlamors.gg/public/g__new_world_gold.png')
 			.addField('\u200b', `**Rank ${display.spaces(3)} Member**`)
